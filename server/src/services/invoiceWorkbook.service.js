@@ -3,7 +3,8 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { invoiceAmountWords } from '../utils/numberToWords.js';
 
-const assetPath = (...parts) => path.resolve(process.cwd(), 'assets', ...parts);
+const assetPath = (...parts) =>
+  path.resolve(process.cwd(), 'assets', ...parts);
 
 const today = () =>
   new Intl.DateTimeFormat('en-GB', {
@@ -15,17 +16,40 @@ const today = () =>
     .replaceAll('/', '-');
 
 const makeBold = (cell) => {
-  cell.font = { ...cell.font, bold: true };
+  cell.font = {
+    ...cell.font,
+    bold: true,
+  };
 };
 
 const setSize = (cell, size) => {
-  cell.font = { ...cell.font, size };
+  cell.font = {
+    ...cell.font,
+    size,
+  };
 };
+
+function setSigningCompanyName(cell, legalName) {
+  cell.value = `For ${legalName}`;
+
+  cell.alignment = {
+    ...cell.alignment,
+    horizontal: 'right',
+    vertical: 'middle',
+    indent: 7,
+  };
+
+  cell.font = {
+    ...cell.font,
+    bold: true,
+  };
+}
 
 function writeIssuerDetails(sheet, issuer, isIntraState) {
   sheet.getCell('B6').value = `              :      ${issuer.gstNumber}`;
   sheet.getCell('B7').value = `              :      ${issuer.legalName}`;
-  sheet.getCell('B8').value = `              :      ${issuer.registeredAddress}`;
+  sheet.getCell('B8').value =
+    `              :      ${issuer.registeredAddress}`;
 
   const bankStartRow = isIntraState ? 31 : 30;
 
@@ -33,7 +57,7 @@ function writeIssuerDetails(sheet, issuer, isIntraState) {
     `Bank A/C No.          : ${issuer.bankAccountNumber}`;
 
   sheet.getCell(`A${bankStartRow + 1}`).value =
-    `Account Type          : ${issuer.bankAccountType}`;
+    `Type Of A/C           : ${issuer.bankAccountType}`;
 
   sheet.getCell(`A${bankStartRow + 2}`).value =
     `Bank Name & Address   : ${issuer.bankNameAndAddress}`;
@@ -42,10 +66,13 @@ function writeIssuerDetails(sheet, issuer, isIntraState) {
     `IFSC Code             : ${issuer.ifscCode}`;
 
   sheet.getCell(`A${bankStartRow + 4}`).value =
-    `PAN No.               : ${issuer.panNumber}`;
+    `PAN NO.               : ${issuer.panNumber}`;
 
-  sheet.getCell(`A${bankStartRow + 6}`).value =
-    `For ${issuer.signatoryCompanyName}`;
+  // Template 1: A36. Template 2: A37.
+  setSigningCompanyName(
+    sheet.getCell(`A${bankStartRow + 6}`),
+    issuer.legalName
+  );
 }
 
 export async function createInvoiceWorkbook({
@@ -96,8 +123,12 @@ export async function createInvoiceWorkbook({
           .join(', ');
 
   sheet.getCell('A14').value = `Address         :      ${address}`;
-  sheet.getCell('A15').value = `State Code   :       ${branch.stateCode}`;
-  sheet.getCell('A16').value = `GSTIN              :        ${branch.gstNo}`;
+  sheet.getCell('A15').value =
+    `State Code   :       ${branch.stateCode}`;
+
+  sheet.getCell('A16').value =
+    `GSTIN              :        ${branch.gstNo}`;
+
   makeBold(sheet.getCell('A16'));
 
   sheet.getCell('A20').value =
@@ -112,17 +143,24 @@ export async function createInvoiceWorkbook({
   sheet.getCell('A23').value =
     `Grade-${contract.grade}, Package ${payload.ctc}/-`;
 
+  sheet.getCell('C20').value = issuer.hsnCode;
+  setSize(sheet.getCell('C20'), 11);
+
   sheet.getCell('D21').value = `${payload.ctc}/-`;
   setSize(sheet.getCell('D21'), 11);
 
-  if (calculation.rate > 1) {
+  if (calculation.pricingType === 'fixed') {
     sheet.getCell('E21').value = 'Fix';
     sheet.getCell('E22').value = 'Rate';
-  } else {
-    sheet.getCell('E21').value = `${calculation.rate * 100}%`;
-  }
 
-  setSize(sheet.getCell('E21'), 11);
+    setSize(sheet.getCell('E21'), 11);
+    setSize(sheet.getCell('E22'), 11);
+  } else {
+    sheet.getCell('E21').value =
+      `${calculation.rate * 100}%`;
+
+    setSize(sheet.getCell('E21'), 11);
+  }
 
   sheet.getCell('F21').value = `${calculation.amount}/-`;
   setSize(sheet.getCell('F21'), 11);
@@ -149,7 +187,10 @@ export async function createInvoiceWorkbook({
 
     sheet.getCell('G27').value = {
       formula: 'SUM(G24:G26)',
-      result: calculation.amount + calculation.cgst + calculation.sgst,
+      result:
+        calculation.amount +
+        calculation.cgst +
+        calculation.sgst,
     };
 
     sheet.getCell('G28').value = {
@@ -187,11 +228,14 @@ export async function createInvoiceWorkbook({
   }
 
   const outputDir = path.resolve(process.cwd(), 'generated');
+
   await fs.mkdir(outputDir, { recursive: true });
 
   const outputName = `invoice ${invoiceNumber}.xlsx`;
 
-  await workbook.xlsx.writeFile(path.join(outputDir, outputName));
+  await workbook.xlsx.writeFile(
+    path.join(outputDir, outputName)
+  );
 
   return outputName;
 }

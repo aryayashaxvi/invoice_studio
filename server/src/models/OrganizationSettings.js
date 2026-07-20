@@ -21,9 +21,21 @@ const organizationSettingsSchema = new mongoose.Schema(
     },
 
     taxes: {
-      cgstRate: { type: Number, min: 0, max: 1 },
-      sgstRate: { type: Number, min: 0, max: 1 },
-      igstRate: { type: Number, min: 0, max: 1 },
+      cgstRate: {
+        type: Number,
+        min: 0,
+        max: 1,
+      },
+      sgstRate: {
+        type: Number,
+        min: 0,
+        max: 1,
+      },
+      igstRate: {
+        type: Number,
+        min: 0,
+        max: 1,
+      },
     },
 
     templates: {
@@ -38,17 +50,62 @@ const organizationSettingsSchema = new mongoose.Schema(
     },
 
     issuer: {
-      legalName: { type: String, trim: true, default: '' },
-      gstNumber: { type: String, trim: true, uppercase: true, default: '' },
-      registeredAddress: { type: String, trim: true, default: '' },
+      legalName: {
+        type: String,
+        trim: true,
+        default: '',
+      },
 
-      bankAccountNumber: { type: String, trim: true, default: '' },
-      bankAccountType: { type: String, trim: true, default: '' },
-      bankNameAndAddress: { type: String, trim: true, default: '' },
-      ifscCode: { type: String, trim: true, uppercase: true, default: '' },
-      panNumber: { type: String, trim: true, uppercase: true, default: '' },
+      gstNumber: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        default: '',
+      },
 
-      signatoryCompanyName: { type: String, trim: true, default: '' },
+      registeredAddress: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+
+      hsnCode: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+
+      bankAccountNumber: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+
+      bankAccountType: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+
+      bankNameAndAddress: {
+        type: String,
+        trim: true,
+        default: '',
+      },
+
+      ifscCode: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        default: '',
+      },
+
+      panNumber: {
+        type: String,
+        trim: true,
+        uppercase: true,
+        default: '',
+      },
     },
   },
   { timestamps: true }

@@ -1,7 +1,35 @@
-export function calculateInvoice(rate, ctc, isIntraState, taxes) {
-  const amount = rate < 1 ? Math.round(rate * ctc) : rate;
-  const cgst = isIntraState ? amount * taxes.cgstRate : 0;
-  const sgst = isIntraState ? amount * taxes.sgstRate : 0;
-  const igst = isIntraState ? 0 : amount * taxes.igstRate;
-  return { amount, cgst, sgst, igst, total: Math.round(amount + cgst + sgst + igst) };
+export function calculateInvoice(
+  pricingType,
+  value,
+  ctc,
+  isIntraState,
+  taxes
+) {
+  const numericValue = Number(value);
+  const numericCtc = Number(ctc);
+
+  const amount =
+    pricingType === 'percentage'
+      ? Math.round(numericValue * numericCtc)
+      : Math.round(numericValue);
+
+  const cgst = isIntraState
+    ? Math.round(amount * Number(taxes.cgstRate))
+    : 0;
+
+  const sgst = isIntraState
+    ? Math.round(amount * Number(taxes.sgstRate))
+    : 0;
+
+  const igst = !isIntraState
+    ? Math.round(amount * Number(taxes.igstRate))
+    : 0;
+
+  return {
+    amount,
+    cgst,
+    sgst,
+    igst,
+    total: Math.round(amount + cgst + sgst + igst),
+  };
 }

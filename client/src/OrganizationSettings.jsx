@@ -4,25 +4,28 @@ import { api } from './api.js';
 const blankSettings = {
   homeState: '',
   invoiceStartNumber: '',
+
   taxes: {
     cgstRate: '',
     sgstRate: '',
     igstRate: '',
   },
+
   templates: {
     intraState: '',
     interstate: '',
   },
+
   issuer: {
     legalName: '',
     gstNumber: '',
     registeredAddress: '',
+    hsnCode: '',
     bankAccountNumber: '',
     bankAccountType: '',
     bankNameAndAddress: '',
     ifscCode: '',
     panNumber: '',
-    signatoryCompanyName: '',
   },
 };
 
@@ -45,14 +48,17 @@ export default function OrganizationSettings() {
       setSettings({
         ...blankSettings,
         ...savedSettings,
+
         taxes: {
           ...blankSettings.taxes,
           ...savedSettings.taxes,
         },
+
         templates: {
           ...blankSettings.templates,
           ...savedSettings.templates,
         },
+
         issuer: {
           ...blankSettings.issuer,
           ...savedSettings.issuer,
@@ -106,10 +112,9 @@ export default function OrganizationSettings() {
     setMessage('');
 
     try {
-      const { settings: savedSettings } =
-        await api.updateOrganizationSettings(settings);
+      const response = await api.updateOrganizationSettings(settings);
 
-      setSettings(savedSettings);
+      setSettings(response.settings);
       setMessage('Organisation settings saved.');
     } catch (error) {
       setMessage(error.message);
@@ -148,7 +153,7 @@ export default function OrganizationSettings() {
 
   async function deactivateState(state) {
     const confirmed = window.confirm(
-      `Deactivate "${state.name}"? Existing invoices will remain unchanged.`
+      `Deactivate "${state.name}"? Existing data will remain unchanged.`
     );
 
     if (!confirmed) return;
@@ -185,8 +190,8 @@ export default function OrganizationSettings() {
         <h2>Organisation settings</h2>
 
         <p className="subtle">
-          These values are inserted into the Excel invoice templates. Complete
-          every field before generating invoices.
+          These details are inserted into the invoice templates. The authorised
+          signatory uses the same Organisation / Issuer Legal Name automatically.
         </p>
 
         <h3>Invoice and tax configuration</h3>
@@ -269,7 +274,7 @@ export default function OrganizationSettings() {
               min="0"
               max="1"
               step="0.0001"
-              placeholder="0.09 for 9%"
+              placeholder="0.09 means 9%"
               value={settings.taxes.cgstRate}
               onChange={(event) =>
                 updateTax('cgstRate', event.target.value)
@@ -285,7 +290,7 @@ export default function OrganizationSettings() {
               min="0"
               max="1"
               step="0.0001"
-              placeholder="0.09 for 9%"
+              placeholder="0.09 means 9%"
               value={settings.taxes.sgstRate}
               onChange={(event) =>
                 updateTax('sgstRate', event.target.value)
@@ -301,7 +306,7 @@ export default function OrganizationSettings() {
               min="0"
               max="1"
               step="0.0001"
-              placeholder="0.18 for 18%"
+              placeholder="0.18 means 18%"
               value={settings.taxes.igstRate}
               onChange={(event) =>
                 updateTax('igstRate', event.target.value)
@@ -311,7 +316,7 @@ export default function OrganizationSettings() {
           </label>
         </div>
 
-        <h3>Issuer details for the Excel template</h3>
+        <h3>Organisation details for Excel</h3>
 
         <div className="fields">
           <label>
@@ -334,6 +339,18 @@ export default function OrganizationSettings() {
                   'gstNumber',
                   event.target.value.toUpperCase()
                 )
+              }
+              required
+            />
+          </label>
+
+          <label>
+            HSN / SAC code
+            <input
+              placeholder="For example: 998311"
+              value={settings.issuer.hsnCode}
+              onChange={(event) =>
+                updateIssuer('hsnCode', event.target.value)
               }
               required
             />
@@ -411,20 +428,6 @@ export default function OrganizationSettings() {
               required
             />
           </label>
-
-          <label>
-            Signatory company name
-            <input
-              value={settings.issuer.signatoryCompanyName}
-              onChange={(event) =>
-                updateIssuer(
-                  'signatoryCompanyName',
-                  event.target.value
-                )
-              }
-              required
-            />
-          </label>
         </div>
 
         <button disabled={saving}>
@@ -442,7 +445,7 @@ export default function OrganizationSettings() {
         <h2>State directory</h2>
 
         <p className="subtle">
-          Add states here once. They will appear in the home-state and GST
+          States saved here appear in Organisation Settings and Company GST
           branch dropdowns.
         </p>
 
@@ -459,9 +462,7 @@ export default function OrganizationSettings() {
 
         <div className="state-list">
           {states.length === 0 && (
-            <p className="subtle">
-              No states have been added yet.
-            </p>
+            <p className="subtle">No states have been added yet.</p>
           )}
 
           {states.map((state, index) => (

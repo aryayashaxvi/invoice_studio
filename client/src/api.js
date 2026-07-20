@@ -17,8 +17,12 @@ async function request(path, options = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
-      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.body
+        ? { 'Content-Type': 'application/json' }
+        : {}),
+      ...(token
+        ? { Authorization: `Bearer ${token}` }
+        : {}),
       ...options.headers,
     },
   });
@@ -34,11 +38,14 @@ async function request(path, options = {}) {
 
 async function download(path, filename) {
   const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+
     throw new Error(body.message || 'Download failed.');
   }
 
@@ -62,7 +69,11 @@ export const api = {
   me: () => request('/auth/me'),
 
   states: (includeInactive = false) =>
-    request(`/states${includeInactive ? '?includeInactive=true' : ''}`),
+    request(
+      `/states${
+        includeInactive ? '?includeInactive=true' : ''
+      }`
+    ),
 
   createState: (data) =>
     request('/states', {
@@ -77,10 +88,14 @@ export const api = {
     }),
 
   deactivateState: (id) =>
-    request(`/states/${id}`, { method: 'DELETE' }),
+    request(`/states/${id}`, {
+      method: 'DELETE',
+    }),
 
   companies: (all = false) =>
-    request(`/companies${all ? '?includeInactive=true' : ''}`),
+    request(
+      `/companies${all ? '?includeInactive=true' : ''}`
+    ),
 
   createCompany: (data) =>
     request('/companies', {
@@ -95,9 +110,12 @@ export const api = {
     }),
 
   deactivateCompany: (id) =>
-    request(`/companies/${id}`, { method: 'DELETE' }),
+    request(`/companies/${id}`, {
+      method: 'DELETE',
+    }),
 
-  organizationSettings: () => request('/organization-settings'),
+  organizationSettings: () =>
+    request('/organization-settings'),
 
   updateOrganizationSettings: (data) =>
     request('/organization-settings', {
@@ -113,8 +131,16 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  deleteInvoice: (id) =>
+    request(`/invoices/${id}`, {
+      method: 'DELETE',
+    }),
+
   downloadInvoice: (invoice) =>
-    download(`/invoices/${invoice._id}/download`, invoice.generatedFile),
+    download(
+      `/invoices/${invoice._id}/download`,
+      invoice.generatedFile
+    ),
 
   users: () => request('/auth/users'),
 
