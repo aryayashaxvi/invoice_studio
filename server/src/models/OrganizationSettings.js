@@ -1,19 +1,60 @@
 import mongoose from 'mongoose';
 
-const organizationSettingsSchema = new mongoose.Schema({
-  key: { type: String, default: 'default', unique: true, immutable: true },
-  organizationName: { type: String, required: true, trim: true, default: 'The Pursuit' },
-  homeState: { type: String, required: true, trim: true, default: 'Haryana' },
-  invoiceStartNumber: { type: Number, required: true, min: 1, default: 173 },
-  taxes: {
-    cgstRate: { type: Number, required: true, min: 0, max: 1, default: 0.09 },
-    sgstRate: { type: Number, required: true, min: 0, max: 1, default: 0.09 },
-    igstRate: { type: Number, required: true, min: 0, max: 1, default: 0.18 }
-  },
-  templates: {
-    intraState: { type: String, enum: ['template1.xlsx', 'template2.xlsx'], default: 'template2.xlsx' },
-    interstate: { type: String, enum: ['template1.xlsx', 'template2.xlsx'], default: 'template1.xlsx' }
-  }
-}, { timestamps: true });
+const organizationSettingsSchema = new mongoose.Schema(
+  {
+    key: {
+      type: String,
+      default: 'default',
+      unique: true,
+      immutable: true,
+    },
 
-export default mongoose.model('OrganizationSettings', organizationSettingsSchema);
+    homeState: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+
+    invoiceStartNumber: {
+      type: Number,
+      min: 1,
+    },
+
+    taxes: {
+      cgstRate: { type: Number, min: 0, max: 1 },
+      sgstRate: { type: Number, min: 0, max: 1 },
+      igstRate: { type: Number, min: 0, max: 1 },
+    },
+
+    templates: {
+      intraState: {
+        type: String,
+        enum: ['template1.xlsx', 'template2.xlsx'],
+      },
+      interstate: {
+        type: String,
+        enum: ['template1.xlsx', 'template2.xlsx'],
+      },
+    },
+
+    issuer: {
+      legalName: { type: String, trim: true, default: '' },
+      gstNumber: { type: String, trim: true, uppercase: true, default: '' },
+      registeredAddress: { type: String, trim: true, default: '' },
+
+      bankAccountNumber: { type: String, trim: true, default: '' },
+      bankAccountType: { type: String, trim: true, default: '' },
+      bankNameAndAddress: { type: String, trim: true, default: '' },
+      ifscCode: { type: String, trim: true, uppercase: true, default: '' },
+      panNumber: { type: String, trim: true, uppercase: true, default: '' },
+
+      signatoryCompanyName: { type: String, trim: true, default: '' },
+    },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model(
+  'OrganizationSettings',
+  organizationSettingsSchema
+);

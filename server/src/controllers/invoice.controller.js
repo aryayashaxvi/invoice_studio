@@ -20,6 +20,31 @@ export const createInvoice = asyncHandler(async (req, res) => {
   const contract = company.contracts.id(payload.contractId);
   if (!branch || !contract || !contract.isActive) return res.status(422).json({ message: 'The selected GST branch or contract is no longer available.' });
   const settings = await getOrganizationSettings();
+
+  const isConfigured =
+    settings.homeState &&
+    settings.invoiceStartNumber &&
+    settings.taxes?.cgstRate !== undefined &&
+    settings.taxes?.sgstRate !== undefined &&
+    settings.taxes?.igstRate !== undefined &&
+    settings.templates?.intraState &&
+    settings.templates?.interstate &&
+    settings.issuer?.legalName &&
+    settings.issuer?.gstNumber &&
+    settings.issuer?.registeredAddress &&
+    settings.issuer?.bankAccountNumber &&
+    settings.issuer?.bankAccountType &&
+    settings.issuer?.bankNameAndAddress &&
+    settings.issuer?.ifscCode &&
+    settings.issuer?.panNumber &&
+    settings.issuer?.signatoryCompanyName;
+
+  if (!isConfigured) {
+    return res.status(422).json({
+      message:
+        'Complete Organisation Settings before generating an invoice.',
+    });
+  }
   const isIntraState = branch.state.trim().toLowerCase() === settings.homeState.trim().toLowerCase();
   const rate = contract.value;
   const calculation = { ...calculateInvoice(rate, payload.ctc, isIntraState, settings.taxes), rate };
@@ -27,7 +52,16 @@ export const createInvoice = asyncHandler(async (req, res) => {
   const counter = await Counter.findByIdAndUpdate('invoiceNumber', { $inc: { value: 1 } }, { new: true });
   const invoiceNumber = counter.value;
   const generatedFile = await createInvoiceWorkbook({ invoiceNumber, company, branch, contract, payload, calculation, settings, isIntraState });
-  const invoice = await Invoice.create({ invoiceNumber, candidateName: payload.candidateName, employeeCode: payload.employeeCode, role: payload.role, city: payload.city, state: branch.state, grade: contract.grade, ctc: payload.ctc, dateOfJoining: payload.dateOfJoining, company: { id: company._id, code: company.code, legalName: company.legalName, branch: branch.toObject(), contract: contract.toObject() }, organization: { name: settings.organizationName, homeState: settings.homeState, taxes: settings.taxes.toObject ? settings.taxes.toObject() : settings.taxes, template: isIntraState ? settings.templates.intraState : settings.templates.interstate }, amount: calculation.amount, rate, cgst: calculation.cgst, sgst: calculation.sgst, igst: calculation.igst, total: calculation.total, generatedFile, createdBy: req.user._id });
+  const invoice = await Invoice.create({ invoiceNumber, candidateName: payload.candidateName, employeeCode: payload.employeeCode, role: payload.role, city: payload.city, state: branch.state, grade: contract.grade, ctc: payload.ctc, dateOfJoining: payload.dateOfJoining, company: { id: company._id, code: company.code, legalName: company.legalName, branch: branch.toObject(), contract: contract.toObject() }, organization: {
+  name: settings.issuer.legalName,
+  homeState: settings.homeState,
+  taxes: settings.taxes.toObject
+    ? settings.taxes.toObject()
+    : settings.taxes,
+  template: isIntraState
+    ? settings.templates.intraState
+    : settings.templates.interstate,
+} , amount: calculation.amount, rate, cgst: calculation.cgst, sgst: calculation.sgst, igst: calculation.igst, total: calculation.total, generatedFile, createdBy: req.user._id });
   res.status(201).json({ invoice, downloadUrl: `/api/invoices/${invoice._id}/download` });
 });
 

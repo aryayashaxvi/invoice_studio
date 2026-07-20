@@ -1,6 +1,9 @@
-node_modules/
-.env
-server/uploads/
-server/generated/
-client/dist/
+server/.env
 
+client/.env
+
+.env
+
+node_modules
+
+server/generated
