@@ -147,6 +147,26 @@ Administrators can configure **Organisation settings** before generating the fir
 
 When an invoice branch is in the configured home state, the application applies CGST and SGST and uses the intra-state template. All other branches receive IGST and use the interstate template. The configured first invoice number is locked after the first invoice is generated to protect invoice sequence integrity.
 
+## Excel template setup
+
+Before using the application, edit both invoice templates in `server/assets/templates/` with your organisation's permanent invoice details. The application preserves these cells and only fills the invoice-specific fields.
+
+Update the following placeholders in both `template1.xlsx` and `template2.xlsx`:
+
+| Placeholder | Replace with |
+| --- | --- |
+| `[GST NUMBER]` | Your organisation's GSTIN |
+| `[NAME]` | Your organisation's legal name |
+| `[ADDRESS_LINE_1, ADDRESS_LINE2, CITY, STATE, PINCODE]` | Your registered business address |
+| `[AC_No]` | Bank account number |
+| `[Current A/C or SAVINGS A/C]` | Bank account type |
+| `[BRANCH_NAME_AND_ADDRESS]` | Bank name, branch, and address |
+| `[IFSC_CODE]` | IFSC code |
+| `[PAN NO.]` | PAN number |
+| `[COMPANY_NAME]` | Name shown above the authorised-signatory line |
+
+Do not rename the files or move the data-entry layout cells. The application expects the templates to remain named `template1.xlsx` and `template2.xlsx`. `template1.xlsx` is normally used for interstate invoices; `template2.xlsx` is normally used for invoices where the customer branch is in the configured organisation home state. This selection can be changed in **Organisation settings**.
+
 ## Available scripts
 
 | Command | Description |
@@ -163,4 +183,3 @@ When an invoice branch is in the configured home state, the application applies 
 - Configure `CLIENT_URL` to your deployed frontend URL before deployment.
 - Use HTTPS and a managed MongoDB backup strategy in production.
 - Store generated invoices in durable object storage such as S3, Azure Blob Storage, or Google Cloud Storage for production deployments.
-
