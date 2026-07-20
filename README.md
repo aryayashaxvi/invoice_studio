@@ -6,6 +6,7 @@ A secure, database-driven invoice generator for recruitment and placement busine
 
 - Secure JWT authentication with `admin` and `operator` roles
 - Admin management of users, companies, GST branches, and contract rates
+- Configurable organisation home state, tax rates, invoice templates, and first invoice number
 - Dynamic company setup: no company, GST, or contract data is hardcoded
 - Fixed-fee and percentage-of-CTC contract pricing
 - ExcelJS invoice generation from existing `.xlsx` templates
@@ -134,6 +135,18 @@ invoice-generator-mern/
 
 Companies can be deactivated rather than permanently deleted. This prevents new invoice generation while preserving historic invoices and auditability.
 
+## Organisation settings
+
+Administrators can configure **Organisation settings** before generating the first invoice:
+
+- Home state
+- First invoice number (for example, enter `500` to make the first invoice number 500)
+- CGST, SGST, and IGST rates as decimal values (`0.09` means 9%)
+- Intra-state and interstate invoice templates
+- Organisation name used in generated invoice text
+
+When an invoice branch is in the configured home state, the application applies CGST and SGST and uses the intra-state template. All other branches receive IGST and use the interstate template. The configured first invoice number is locked after the first invoice is generated to protect invoice sequence integrity.
+
 ## Available scripts
 
 | Command | Description |
@@ -150,5 +163,4 @@ Companies can be deactivated rather than permanently deleted. This prevents new 
 - Configure `CLIENT_URL` to your deployed frontend URL before deployment.
 - Use HTTPS and a managed MongoDB backup strategy in production.
 - Store generated invoices in durable object storage such as S3, Azure Blob Storage, or Google Cloud Storage for production deployments.
-
 
