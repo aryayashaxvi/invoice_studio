@@ -1,0 +1,12 @@
+{
+  "name": "invoice-generator-mern",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "create-admin": "npm --prefix server run create-admin",
+    "start": "npm --prefix server start"
+  },
+  "devDependencies": { "concurrently": "^9.1.2" }
+}
