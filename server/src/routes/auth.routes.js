@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { createUser, listUsers, login, me, updateUserStatus } from '../controllers/auth.controller.js';
+import { allowRoles, requireAuth } from '../middleware/auth.js';
+const router = Router();
+router.post('/login', login);
+router.get('/me', requireAuth, me);
+router.get('/users', requireAuth, allowRoles('admin'), listUsers);
+router.post('/users', requireAuth, allowRoles('admin'), createUser);
+router.patch('/users/:id/status', requireAuth, allowRoles('admin'), updateUserStatus);
+export default router;

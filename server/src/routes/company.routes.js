@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import { createCompany, deactivateCompany, getCompany, listCompanies, updateCompany } from '../controllers/company.controller.js';
+import { allowRoles, requireAuth } from '../middleware/auth.js';
+const router = Router();
+router.use(requireAuth);
+router.get('/', listCompanies);
+router.post('/', allowRoles('admin'), createCompany);
+router.get('/:id', getCompany);
+router.put('/:id', allowRoles('admin'), updateCompany);
+router.delete('/:id', allowRoles('admin'), deactivateCompany);
+export default router;

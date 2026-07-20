@@ -1,0 +1,7 @@
+import mongoose from 'mongoose';
+
+const branchSchema = new mongoose.Schema({ state: { type: String, required: true, trim: true }, stateCode: { type: String, required: true, trim: true }, gstNo: { type: String, required: true, trim: true, uppercase: true }, addressLine1: { type: String, default: '' }, addressLine2: { type: String, default: '' }, city: { type: String, default: '' }, billingState: { type: String, default: '' }, pin: { type: String, default: '' } }, { _id: true });
+const contractSchema = new mongoose.Schema({ grade: { type: String, required: true, trim: true }, pricingType: { type: String, enum: ['fixed', 'percentage'], required: true }, value: { type: Number, required: true, min: 0 }, isActive: { type: Boolean, default: true } }, { _id: true });
+const companySchema = new mongoose.Schema({ code: { type: String, unique: true, required: true, uppercase: true, trim: true }, legalName: { type: String, required: true, trim: true }, isActive: { type: Boolean, default: true, index: true }, branches: { type: [branchSchema], default: [] }, contracts: { type: [contractSchema], default: [] }, invoiceSettings: { addressDisplayMode: { type: String, enum: ['full', 'stateOnly'], default: 'full' }, employeeCodePrefix: { type: String, default: '', trim: true } } }, { timestamps: true });
+companySchema.index({ legalName: 1 }, { unique: true });
+export default mongoose.model('Company', companySchema);
